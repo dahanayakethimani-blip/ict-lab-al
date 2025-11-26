@@ -1,0 +1,5 @@
+{
+  "name": "ICT Grade 12 Learning Lab",
+  "description": "An interactive educational platform covering the Grade 12 ICT syllabus (Sri Lanka), featuring logic gate simulators, number system converters, OS scheduling visualizations, and an AI-powered syllabus tutor.",
+  "requestFramePermissions": []
+}
