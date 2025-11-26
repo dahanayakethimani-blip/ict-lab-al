@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ModuleType } from './types';
 import LogicGateSim from './components/LogicGateSim';
@@ -24,11 +23,14 @@ import AssignmentCenter from './components/AssignmentCenter';
 import ProgressReport from './components/ProgressReport';
 import LoginPage from './components/LoginPage';
 import LandingPage from './components/LandingPage';
+import ProfileSettings from './components/ProfileSettings';
 import { useAuth } from './contexts/AuthContext';
-import { LayoutDashboard, Binary, Cpu, Bot, BookOpen, Workflow, FileText, Database, CircuitBoard, Network, Code, ShoppingCart, Table, Globe, Zap, Server, BrainCircuit, ClipboardList, Menu, X, Flame, Trophy, Calendar, TrendingUp, LogOut } from 'lucide-react';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { LayoutDashboard, Binary, Cpu, Bot, BookOpen, Workflow, FileText, Database, CircuitBoard, Network, Code, ShoppingCart, Table, Globe, Zap, Server, BrainCircuit, ClipboardList, Menu, X, Flame, Trophy, Calendar, TrendingUp, LogOut, Sun, Moon, Settings } from 'lucide-react';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const { user, loading, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [activeModule, setActiveModule] = useState<ModuleType>(ModuleType.DASHBOARD);
   const [xp, setXp] = useState(1350);
   const [streak, setStreak] = useState(4);
@@ -36,7 +38,7 @@ const App: React.FC = () => {
   const [showLogin, setShowLogin] = useState(false);
 
   if (loading) {
-    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Loading...</div>;
+    return <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center text-gray-900 dark:text-white">Loading...</div>;
   }
 
   if (!user) {
@@ -49,7 +51,7 @@ const App: React.FC = () => {
   const handleModuleSelect = (module: ModuleType) => {
     setActiveModule(module);
     setXp(prev => prev + 5);
-    setIsMobileMenuOpen(false); // Close menu on selection on mobile
+    setIsMobileMenuOpen(false);
   };
 
   const renderModule = () => {
@@ -75,346 +77,258 @@ const App: React.FC = () => {
       case ModuleType.PROJECT_MANAGER: return <ProjectManager />;
       case ModuleType.ASSIGNMENTS: return <AssignmentCenter />;
       case ModuleType.PROGRESS: return <ProgressReport />;
+      case ModuleType.PROGRESS: return <ProgressReport />;
+      case ModuleType.PROFILE_SETTINGS: return <ProfileSettings />;
       default: return <Dashboard onSelect={handleModuleSelect} xp={xp} streak={streak} />;
     }
   };
 
-  const getLevel = (xp: number) => Math.floor(xp / 1000) + 1;
+  const menuCategories = [
+    {
+      title: "Main",
+      items: [
+        { id: ModuleType.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
+        { id: ModuleType.PROGRESS, label: 'Progress', icon: TrendingUp },
+        { id: ModuleType.ASSIGNMENTS, label: 'Assignments', icon: BookOpen },
+      ]
+    },
+    {
+      title: "Computer Science",
+      items: [
+        { id: ModuleType.LOGIC_GATES, label: 'Logic Gates', icon: Binary },
+        { id: ModuleType.NUMBER_SYSTEMS, label: 'Number Systems', icon: FileText },
+        { id: ModuleType.OS_SCHEDULING, label: 'OS Visualizer', icon: Cpu },
+        { id: ModuleType.FETCH_EXECUTE, label: 'CPU Architecture', icon: CircuitBoard },
+      ]
+    },
+    {
+      title: "Programming & Web",
+      items: [
+        { id: ModuleType.PYTHON_LAB, label: 'Python Lab', icon: Code },
+        { id: ModuleType.WEB_STUDIO, label: 'Web Studio', icon: Globe },
+        { id: ModuleType.PHP_LAB, label: 'PHP Lab', icon: Server },
+        { id: ModuleType.SQL_LAB, label: 'SQL Lab', icon: Database },
+      ]
+    },
+    {
+      title: "Networking",
+      items: [
+        { id: ModuleType.NETWORK_LAB, label: 'Network Designer', icon: Network },
+        { id: ModuleType.SUBNETTING, label: 'Subnetting Lab', icon: Network },
+        { id: ModuleType.IOT_SIM, label: 'IoT Simulator', icon: Zap },
+      ]
+    },
+    {
+      title: "Advanced",
+      items: [
+        { id: ModuleType.AI_TUTOR, label: 'AI Tutor', icon: Bot },
+        { id: ModuleType.AGENT_SYSTEMS, label: 'AI Agents', icon: Bot },
+        { id: ModuleType.NEURAL_NET, label: 'Neural Networks', icon: BrainCircuit },
+        { id: ModuleType.NORMALIZATION, label: 'Normalization', icon: Table },
+        { id: ModuleType.ECOMMERCE, label: 'E-Commerce', icon: ShoppingCart },
+      ]
+    },
+    {
+      title: "Tools",
+      items: [
+        { id: ModuleType.FLOWCHART, label: 'Flowcharts', icon: Workflow },
+        { id: ModuleType.PROJECT_MANAGER, label: 'Project Manager', icon: ClipboardList },
+        { id: ModuleType.PAST_PAPERS, label: 'Past Papers', icon: FileText },
+      ]
+    },
+    {
+      title: "Settings",
+      items: [
+        { id: ModuleType.PROFILE_SETTINGS, label: 'Profile Settings', icon: Settings },
+      ]
+    }
+  ];
+
+  const allMenuItems = menuCategories.flatMap(category => category.items);
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-950 font-sans text-slate-200">
+    <div className="flex h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+      >
+        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
 
-      {/* Mobile Header */}
-      <div className="md:hidden bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-between sticky top-0 z-30">
-        <div className="flex items-center gap-2 font-bold text-white">
-          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-            <BookOpen className="w-5 h-5 text-white" />
+      {/* Sidebar */}
+      <div className={`
+        fixed lg:static inset-y-0 left-0 z-40 w-72 
+        bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800
+        transform transition-transform duration-300 ease-in-out
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        <div className="p-6">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/30">
+              <BookOpen className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight">ICT Lab</h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Grade 12 & 13</p>
+            </div>
           </div>
-          <span>ICT Lab</span>
+
+          <div className="space-y-6 h-[calc(100vh-180px)] overflow-y-auto pr-2 custom-scrollbar pb-6">
+            {menuCategories.map((category, index) => (
+              <div key={index}>
+                <h3 className="px-4 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">
+                  {category.title}
+                </h3>
+                <div className="space-y-1">
+                  {category.items.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleModuleSelect(item.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${activeModule === item.id
+                        ? 'bg-brand-500 text-white shadow-md shadow-brand-500/25'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                        }`}
+                    >
+                      <item.icon size={18} />
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="absolute bottom-0 left-0 right-0 p-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800">
+            <div className="flex items-center justify-between gap-2">
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                title="Toggle Theme"
+              >
+                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+              <button
+                onClick={logout}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+              >
+                <LogOut size={18} />
+                Sign Out
+              </button>
+            </div>
+          </div>
         </div>
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-slate-300 hover:text-white">
-          {isMobileMenuOpen ? <X /> : <Menu />}
-        </button>
       </div>
 
-      {/* Mobile Overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Sidebar Navigation */}
-      <aside className={`
-        fixed inset-y-0 left-0 z-40 w-72 bg-slate-900 border-r border-slate-800 transform transition-transform duration-300 ease-in-out
-        md:translate-x-0 md:static md:w-64 md:h-screen md:sticky md:top-0 flex flex-col
-        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
-        <div className="p-6 border-b border-slate-800 hidden md:block">
-          <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-white" />
-            </div>
-            ICT Lab <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700">A/L</span>
-          </h1>
-        </div>
-
-        {/* User Stats (Mini) */}
-        <div className="px-6 py-4 flex items-center justify-between border-b border-slate-800/50 bg-slate-900/50">
-          <div className="flex items-center gap-2 text-yellow-400">
-            <Trophy className="w-4 h-4" />
-            <span className="text-sm font-bold">Lvl {getLevel(xp)}</span>
-          </div>
-          <div className="flex items-center gap-1 text-orange-400">
-            <Flame className="w-4 h-4" />
-            <span className="text-sm font-bold">{streak}</span>
-          </div>
-        </div>
-
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
-          <NavItem
-            icon={<LayoutDashboard size={18} />}
-            label="Learning Path"
-            active={activeModule === ModuleType.DASHBOARD}
-            onClick={() => handleModuleSelect(ModuleType.DASHBOARD)}
-          />
-
-          <div className="pt-4 pb-2 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-emerald-500">Student Zone</div>
-          <NavItem
-            icon={<Calendar size={18} />}
-            label="Assignments"
-            active={activeModule === ModuleType.ASSIGNMENTS}
-            onClick={() => handleModuleSelect(ModuleType.ASSIGNMENTS)}
-          />
-          <NavItem
-            icon={<TrendingUp size={18} />}
-            label="My Progress"
-            active={activeModule === ModuleType.PROGRESS}
-            onClick={() => handleModuleSelect(ModuleType.PROGRESS)}
-          />
-
-          <div className="pt-4 pb-2 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Fundamentals</div>
-          <NavItem
-            icon={<CircuitBoard size={18} />}
-            label="CPU Cycle"
-            active={activeModule === ModuleType.FETCH_EXECUTE}
-            onClick={() => handleModuleSelect(ModuleType.FETCH_EXECUTE)}
-          />
-          <NavItem
-            icon={<Binary size={18} />}
-            label="Number Systems"
-            active={activeModule === ModuleType.NUMBER_SYSTEMS}
-            onClick={() => handleModuleSelect(ModuleType.NUMBER_SYSTEMS)}
-          />
-          <NavItem
-            icon={<Workflow size={18} />}
-            label="Logic Simulator"
-            active={activeModule === ModuleType.LOGIC_GATES}
-            onClick={() => handleModuleSelect(ModuleType.LOGIC_GATES)}
-          />
-
-          <div className="pt-4 pb-2 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Systems & Network</div>
-          <NavItem
-            icon={<Cpu size={18} />}
-            label="OS Scheduling"
-            active={activeModule === ModuleType.OS_SCHEDULING}
-            onClick={() => handleModuleSelect(ModuleType.OS_SCHEDULING)}
-          />
-          <NavItem
-            icon={<Network size={18} />}
-            label="Topology Lab"
-            active={activeModule === ModuleType.NETWORK_LAB}
-            onClick={() => handleModuleSelect(ModuleType.NETWORK_LAB)}
-          />
-          <NavItem
-            icon={<Globe size={18} />}
-            label="Subnetting"
-            active={activeModule === ModuleType.SUBNETTING}
-            onClick={() => handleModuleSelect(ModuleType.SUBNETTING)}
-          />
-
-          <div className="pt-4 pb-2 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Data Management</div>
-          <NavItem
-            icon={<Database size={18} />}
-            label="SQL Lab"
-            active={activeModule === ModuleType.SQL_LAB}
-            onClick={() => handleModuleSelect(ModuleType.SQL_LAB)}
-          />
-          <NavItem
-            icon={<Table size={18} />}
-            label="Normalization"
-            active={activeModule === ModuleType.NORMALIZATION}
-            onClick={() => handleModuleSelect(ModuleType.NORMALIZATION)}
-          />
-
-          <div className="pt-4 pb-2 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Grade 13 Advanced</div>
-          <NavItem
-            icon={<Server size={18} />}
-            label="PHP & Server"
-            active={activeModule === ModuleType.PHP_LAB}
-            onClick={() => handleModuleSelect(ModuleType.PHP_LAB)}
-          />
-          <NavItem
-            icon={<Zap size={18} />}
-            label="IoT Systems"
-            active={activeModule === ModuleType.IOT_SIM}
-            onClick={() => handleModuleSelect(ModuleType.IOT_SIM)}
-          />
-          <NavItem
-            icon={<Bot size={18} />}
-            label="Agent Systems"
-            active={activeModule === ModuleType.AGENT_SYSTEMS}
-            onClick={() => handleModuleSelect(ModuleType.AGENT_SYSTEMS)}
-          />
-          <NavItem
-            icon={<BrainCircuit size={18} />}
-            label="Neural Networks"
-            active={activeModule === ModuleType.NEURAL_NET}
-            onClick={() => handleModuleSelect(ModuleType.NEURAL_NET)}
-          />
-
-          <div className="pt-4 pb-2 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Project & Exams</div>
-          <NavItem
-            icon={<ClipboardList size={18} />}
-            label="Project Manager"
-            active={activeModule === ModuleType.PROJECT_MANAGER}
-            onClick={() => handleModuleSelect(ModuleType.PROJECT_MANAGER)}
-          />
-          <NavItem
-            icon={<Code size={18} />}
-            label="Python Lab"
-            active={activeModule === ModuleType.PYTHON_LAB}
-            onClick={() => handleModuleSelect(ModuleType.PYTHON_LAB)}
-          />
-          <NavItem
-            icon={<ShoppingCart size={18} />}
-            label="E-Commerce"
-            active={activeModule === ModuleType.ECOMMERCE}
-            onClick={() => handleModuleSelect(ModuleType.ECOMMERCE)}
-          />
-          <NavItem
-            icon={<FileText size={18} />}
-            label="Past Papers"
-            active={activeModule === ModuleType.PAST_PAPERS}
-            onClick={() => handleModuleSelect(ModuleType.PAST_PAPERS)}
-          />
-
-          <div className="pt-4 mt-auto border-t border-slate-800">
-            <button
-              onClick={logout}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all"
-            >
-              <LogOut size={18} />
-              <span className="font-medium text-sm">Sign Out</span>
-            </button>
-          </div>
-        </nav>
-      </aside>
-
       {/* Main Content */}
-      <main className="flex-1 p-3 md:p-6 overflow-y-auto w-full">
-        <div className="max-w-6xl mx-auto">
-          {renderModule()}
-        </div>
-      </main>
+      <div className="flex-1 overflow-hidden relative">
+        <header className="h-16 bg-white/50 dark:bg-gray-900/50 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-8 sticky top-0 z-30">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            {allMenuItems.find(m => m.id === activeModule)?.label}
+          </h2>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 rounded-full text-sm font-medium border border-orange-100 dark:border-orange-900/30">
+              <Flame size={16} />
+              <span>{streak} Day Streak</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 rounded-full text-sm font-medium border border-brand-100 dark:border-brand-900/30">
+              <Trophy size={16} />
+              <span>{xp} XP</span>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-400 to-purple-500 p-[2px]">
+              <div className="w-full h-full rounded-full bg-white dark:bg-gray-900 flex items-center justify-center text-xs font-bold">
+                {user?.email?.charAt(0).toUpperCase()}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="h-[calc(100vh-64px)] overflow-y-auto p-8 custom-scrollbar">
+          <div className="max-w-7xl mx-auto">
+            {renderModule()}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
 
-const NavItem = ({ icon, label, active, onClick }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void }) => (
-  <button
-    onClick={onClick}
-    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${active
-      ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
-      : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-      }`}
-  >
-    {icon}
-    <span className="font-medium text-sm">{label}</span>
-  </button>
-);
+const Dashboard: React.FC<{ onSelect: (m: ModuleType) => void, xp: number, streak: number }> = ({ onSelect, xp, streak }) => (
+  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="bg-gradient-to-br from-brand-500 to-brand-600 rounded-3xl p-6 text-white shadow-lg shadow-brand-500/20">
+        <h3 className="text-lg font-medium opacity-90 mb-1">Total XP</h3>
+        <div className="text-4xl font-bold mb-4">{xp}</div>
+        <div className="w-full bg-white/20 rounded-full h-2 mb-2">
+          <div className="bg-white rounded-full h-2 w-[70%]"></div>
+        </div>
+        <p className="text-sm opacity-80">Level 12 • 350 XP to next level</p>
+      </div>
 
-const Dashboard = ({ onSelect, xp, streak }: { onSelect: (m: ModuleType) => void, xp: number, streak: number }) => (
-  <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500 pb-20">
-    {/* Hero Section */}
-    <div className="relative overflow-hidden bg-gradient-to-r from-indigo-900 to-blue-900 rounded-2xl p-6 md:p-8 text-white shadow-2xl border border-indigo-700/50">
-      <div className="relative z-10">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">Syllabus Complete!</h2>
-            <p className="text-blue-200 max-w-2xl text-sm md:text-base">
-              You have access to all modules for Grade 12 & 13. Check the <span className="font-bold text-white">Assignments</span> tab for your weekly tasks.
-            </p>
-            <button
-              onClick={() => onSelect(ModuleType.ASSIGNMENTS)}
-              className="mt-4 bg-white text-blue-900 px-6 py-2 rounded-lg font-bold hover:bg-blue-50 transition-colors shadow-lg"
-            >
-              View Assignments
-            </button>
-          </div>
-          <div className="flex gap-4">
-            <div className="bg-white/10 backdrop-blur p-3 md:p-4 rounded-xl flex flex-col items-center min-w-[80px] md:min-w-[100px]">
-              <span className="text-xs text-blue-200 uppercase font-bold">Level</span>
-              <span className="text-2xl md:text-3xl font-black text-yellow-400">{Math.floor(xp / 1000) + 1}</span>
+      <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Weekly Activity</h3>
+          <Calendar className="text-gray-400" size={20} />
+        </div>
+        <div className="flex items-end justify-between h-24 gap-2">
+          {[40, 70, 30, 85, 50, 65, 45].map((h, i) => (
+            <div key={i} className="w-full bg-gray-100 dark:bg-gray-800 rounded-t-lg relative group">
+              <div
+                className="absolute bottom-0 left-0 right-0 bg-brand-500 rounded-t-lg transition-all duration-500 group-hover:bg-brand-400"
+                style={{ height: `${h}%` }}
+              ></div>
             </div>
-          </div>
+          ))}
+        </div>
+        <div className="flex justify-between mt-2 text-xs text-gray-400 font-medium">
+          <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
         </div>
       </div>
-      <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-white/5 to-transparent skew-x-12"></div>
+
+      <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Current Streak</h3>
+          <Flame className="text-orange-500" size={20} />
+        </div>
+        <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{streak} <span className="text-lg text-gray-400 font-normal">days</span></div>
+        <p className="text-gray-500 dark:text-gray-400 text-sm">You're on fire! Complete a lesson today to keep it going.</p>
+      </div>
     </div>
 
-    {/* Learning Path */}
-    <div className="space-y-6">
-      <h3 className="text-lg md:text-xl font-bold text-white flex items-center gap-2">
-        <BookOpen className="w-5 h-5 text-blue-400" />
-        Grade 13 Final Modules
-      </h3>
-
-      <div className="grid grid-cols-1 gap-6">
-
-        {/* Grade 13: Unit 13 & 14 */}
-        <PathSection title="Trends & Project (Unit 13-14)" progress={100}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <ModuleCard
-              title="Neural Networks"
-              desc="Unit 13.1: AI & Learning"
-              icon={<BrainCircuit className="w-6 h-6 text-fuchsia-400" />}
-              onClick={() => onSelect(ModuleType.NEURAL_NET)}
-              unit="Unit 13"
-              featured
-            />
-            <ModuleCard
-              title="Project Manager"
-              desc="Unit 14: SDLC Board"
-              icon={<ClipboardList className="w-6 h-6 text-emerald-400" />}
-              onClick={() => onSelect(ModuleType.PROJECT_MANAGER)}
-              unit="Unit 14"
-              featured
-            />
-            <ModuleCard
-              title="Agent Systems"
-              desc="Unit 13.2: Multi-Agents"
-              icon={<Bot className="w-6 h-6 text-purple-400" />}
-              onClick={() => onSelect(ModuleType.AGENT_SYSTEMS)}
-              unit="Unit 13"
-            />
-          </div>
-        </PathSection>
-
-        {/* Grade 13: Unit 10 & 11 */}
-        <PathSection title="Advanced Web & IoT (Unit 10-11)" progress={80}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <ModuleCard
-              title="PHP Server Lab"
-              desc="Unit 10.7: Server-Side Scripting"
-              icon={<Server className="w-6 h-6 text-indigo-400" />}
-              onClick={() => onSelect(ModuleType.PHP_LAB)}
-              unit="Unit 10"
-            />
-            <ModuleCard
-              title="IoT Smart Home"
-              desc="Unit 11: Sensors & Actuators"
-              icon={<Zap className="w-6 h-6 text-teal-400" />}
-              onClick={() => onSelect(ModuleType.IOT_SIM)}
-              unit="Unit 11"
-            />
-          </div>
-        </PathSection>
+    <div>
+      <h3 className="text-xl font-bold mb-6">Continue Learning</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[
+          { title: "Logic Gates", icon: Binary, color: "bg-blue-500", id: ModuleType.LOGIC_GATES },
+          { title: "Python Basics", icon: Code, color: "bg-yellow-500", id: ModuleType.PYTHON_LAB },
+          { title: "Network Design", icon: Network, color: "bg-green-500", id: ModuleType.NETWORK_LAB }
+        ].map((item) => (
+          <button
+            key={item.id}
+            onClick={() => onSelect(item.id)}
+            className="group bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-200 dark:border-gray-800 hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 text-left shadow-sm hover:shadow-md"
+          >
+            <div className={`w-12 h-12 ${item.color} rounded-2xl flex items-center justify-center mb-4 shadow-lg opacity-90 group-hover:scale-110 transition-transform duration-300`}>
+              <item.icon className="text-white" size={24} />
+            </div>
+            <h4 className="text-lg font-bold mb-2 group-hover:text-brand-500 transition-colors">{item.title}</h4>
+            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 mb-2 overflow-hidden">
+              <div className="bg-brand-500 h-full w-2/3 rounded-full"></div>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">65% Complete</p>
+          </button>
+        ))}
       </div>
     </div>
   </div>
 );
 
-const PathSection = ({ title, progress, children }: { title: string, progress: number, children?: React.ReactNode }) => (
-  <div className="relative border-l-2 border-slate-800 pl-4 md:pl-8 pb-8 last:pb-0">
-    <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-600 border-4 border-slate-950 shadow-lg shadow-blue-900"></div>
-    <div className="flex items-center justify-between mb-4">
-      <h4 className="text-base md:text-lg font-semibold text-slate-200">{title}</h4>
-      <div className="flex items-center gap-3">
-        <div className="hidden sm:block w-32 h-2 bg-slate-800 rounded-full overflow-hidden">
-          <div className="h-full bg-blue-600 rounded-full" style={{ width: `${progress}%` }}></div>
-        </div>
-        <span className="text-xs font-bold text-blue-400">{progress}%</span>
-      </div>
-    </div>
-    {children}
-  </div>
-);
-
-const ModuleCard = ({ title, desc, icon, onClick, unit, featured, completed }: any) => (
-  <button onClick={onClick} className={`bg-slate-800 p-4 md:p-5 rounded-xl border text-left hover:border-blue-500 transition-all hover:shadow-xl hover:-translate-y-1 group relative overflow-hidden ${featured ? 'border-blue-500/50 shadow-blue-900/20' : 'border-slate-700'} ${completed ? 'opacity-75 hover:opacity-100' : ''}`}>
-    {featured && <div className="absolute top-0 right-0 bg-blue-600 text-white text-[9px] font-bold px-2 py-1 rounded-bl-lg">NEW</div>}
-    {completed && <div className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)]"></div>}
-    <div className="flex justify-between items-start mb-3">
-      <div className="p-2 bg-slate-900 rounded-lg group-hover:bg-slate-800 transition-colors">
-        {icon}
-      </div>
-      <span className="text-[10px] font-mono text-slate-500 border border-slate-700 px-1.5 py-0.5 rounded">{unit}</span>
-    </div>
-    <h3 className="text-sm font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">{title}</h3>
-    <p className="text-xs text-slate-400 leading-relaxed line-clamp-2">{desc}</p>
-  </button>
-);
+const App: React.FC = () => {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+};
 
 export default App;
