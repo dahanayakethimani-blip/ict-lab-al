@@ -1,11 +1,25 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import {
+    User,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signInWithPhoneNumber,
+    RecaptchaVerifier,
+    ConfirmationResult
+} from 'firebase/auth';
 import { auth } from '../services/firebase';
 
 interface AuthContextType {
     user: User | null;
     loading: boolean;
     signInWithGoogle: () => Promise<void>;
+    signInWithEmail: (email: string, pass: string) => Promise<void>;
+    signUpWithEmail: (email: string, pass: string) => Promise<void>;
+    signInWithPhone: (phone: string) => Promise<ConfirmationResult>;
     logout: () => Promise<void>;
 }
 
@@ -34,6 +48,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
+    const signInWithEmail = async (email: string, pass: string) => {
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+        } catch (error) {
+            console.error("Error signing in with Email", error);
+            throw error;
+        }
+    };
+
+    const signUpWithEmail = async (email: string, pass: string) => {
+        try {
+            await createUserWithEmailAndPassword(auth, email, pass);
+        } catch (error) {
+            console.error("Error signing up with Email", error);
+            throw error;
+        }
+    };
+
+    const signInWithPhone = async (phone: string) => {
+        try {
+            // Ensure recaptcha container exists in the UI before calling this
+            const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                'size': 'normal'
+            });
+            const confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
+            return confirmationResult;
+        } catch (error) {
+            console.error("Error signing in with Phone", error);
+            throw error;
+        }
+    };
+
     const logout = async () => {
         try {
             await signOut(auth);
@@ -44,7 +90,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, signInWithGoogle, logout }}>
+        <AuthContext.Provider value={{
+            user,
+            loading,
+            signInWithGoogle,
+            signInWithEmail,
+            signUpWithEmail,
+            signInWithPhone,
+            logout
+        }}>
             {!loading && children}
         </AuthContext.Provider>
     );
